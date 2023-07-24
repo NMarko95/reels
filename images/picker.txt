@@ -1,0 +1,3 @@
+// Na dugme na tastaturi 'Space' simboli ce da pocnu da se vrti jedan za drugim, 260x1300 u pravougaoniku ovih dimenzija, 
+// i vrtece se random simboli do vremena zaustavka, gde ce onaj simbol koji se nadje na liniji koja je na sredini, da se animira tako sto ce iz foldera images/sprites
+// da se sece njegova slika gde sve slike treba da se izvrste u jednoj sekundi, stvarajuci animaciju simbola, animacija ce da se prikazuje dokle god igrac to ne prekine i zavrti sledeci krug
