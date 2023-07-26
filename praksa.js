@@ -176,12 +176,11 @@ function animateSymbols() {
 }
 
 let winningSymbols = [],
-  winSymbolCheck = "1",
-  parsedWinSymbolCheck = parseInt(winSymbolCheck),
   currentSprite,
   spriteAnimateCounter = 0,
   spriteAnimateTime = 40,
-  spriteDim = 260;
+  spriteDim = 260,
+  winningSymbol;
 
 function animateWinSymbols() {
   if (currentTime - lastRender > spriteAnimateTime) {
@@ -189,26 +188,25 @@ function animateWinSymbols() {
     lastRender = Date.now();
   }
   if (spriteAnimateCounter >= 20) spriteAnimateCounter = 0;
-  winningSymbols.forEach((symbol) => {
-    c.clearRect(
-      centeredWidth,
-      symbol.y - movementSpeed,
-      symbolWidth,
-      symbolHeight
-    );
-    currentSprite = sprites[parsedWinSymbolCheck];
-    c.drawImage(
-      sprites[parsedWinSymbolCheck],
-      0,
-      spriteAnimateCounter * spriteDim,
-      spriteDim,
-      spriteDim,
-      symbol.x,
-      symbol.y - movementSpeed,
-      symbolWidth,
-      symbolHeight
-    );
-  });
+  //winningSymbols.forEach((symbol) => {
+  c.clearRect(
+    centeredWidth,
+    winningSymbol.y - movementSpeed,
+    symbolWidth,
+    symbolHeight
+  );
+  c.drawImage(
+    currentSprite,
+    0,
+    spriteAnimateCounter * spriteDim,
+    spriteDim,
+    spriteDim,
+    winningSymbol.x,
+    winningSymbol.y - movementSpeed,
+    symbolWidth,
+    symbolHeight
+  );
+  //});
   currentTime = Date.now();
   spriteAnimateId = requestAnimationFrame(animateWinSymbols);
 }
@@ -222,14 +220,18 @@ function checkWin() {
   document.body.style.pointerEvents = "auto";
   historyImages.push(canvas.toDataURL());
   let symbolNumber, symbolSrcArray, symbolImg;
-  for (let j = 0; j <= tableDim; j++) {
-    symbolImg = board[0][j].img;
-    symbolSrcArray = symbolImg.src.split("/");
-    symbolNumber = symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
-    if (symbolNumber === winSymbolCheck && board[0][j].y > 0)
-      winningSymbols.push(board[0][j]);
-  }
-  if (winningSymbols.length !== 0) animateWin();
+  //for (let j = 0; j <= tableDim; j++) {
+  winningSymbol = board[0][tableDim - 2];
+  symbolImg = winningSymbol.img;
+  symbolSrcArray = symbolImg.src.split("/");
+  symbolNumber = symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
+  currentSprite = sprites[parseInt(symbolNumber)];
+  console.log(currentSprite);
+  animateWin();
+  //if (symbolNumber === winSymbolCheck && board[0][j].y > 0)
+  //winningSymbols.push(board[0][j]);
+  //}
+  //if (winningSymbols.length !== 0) animateWin();
 }
 
 function spin() {
