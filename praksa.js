@@ -1,4 +1,4 @@
-let image, customFunction, animateId, spriteAnimateId;
+let image, animateId, spriteAnimateId;
 
 let board = [],
   sprites = [];
@@ -8,13 +8,12 @@ for (let i = 0; i < 5; i++) {
 
 let currentTime, lastRender;
 
-let historyImages = [],
-  currentHistoryImg;
-
-const canvas = document.querySelector("canvas");
+const canvas = document.querySelector(".main-canvas");
 const c = canvas.getContext("2d");
 
-canvas.width = innerWidth;
+const winCanvas = document.querySelector(".win-canvas");
+const winC = winCanvas.getContext("2d");
+
 canvas.height = innerHeight;
 
 let tableDim = 5;
@@ -25,32 +24,53 @@ const cellHeight = canvas.height / 5;
 const symbolHeight = cellHeight / 1.5;
 const symbolWidth = cellWidth / 1.5;
 
-let numOfSymbols = 11;
+let gameWidth;
+let gameHeight;
 
-c.lineWidth = 5;
-c.strokeStyle = "black";
+let availableSymbols = [3, 5, 7, 8, 10];
+
+let scores = [
+  {
+    id: 3,
+    score: 0,
+  },
+  {
+    id: 5,
+    score: 0,
+  },
+  {
+    id: 7,
+    score: 0,
+  },
+  {
+    id: 8,
+    score: 0,
+  },
+];
 
 function drawTable() {
-  //for (let i = 0; i < tableDim; i++)
   c.strokeRect(0, 0, cellWidth, canvas.height);
 }
 
 function generateRandomNumber() {
-  return Math.floor(Math.random() * numOfSymbols);
+  const randomNumber = Math.floor(Math.random() * availableSymbols.length);
+  return randomNumber;
 }
 
 let symbols = [],
   imagesLoaded = false;
 
 function getImages(counter, isSymbols) {
-  if (counter === numOfSymbols) {
+  if (counter === availableSymbols.length) {
     imagesLoaded = true;
     return;
   }
   image = new Image();
   image.setAttribute(
     "src",
-    `./images/${isSymbols ? "Symbols" : "Sprites"}/${counter}.png`
+    `./images/${isSymbols ? "Symbols" : "Sprites"}/${
+      availableSymbols[counter]
+    }.png`
   );
   image.onload = () => {
     if (isSymbols) symbols.push(image);
@@ -62,28 +82,30 @@ function getImages(counter, isSymbols) {
 getImages(0, true);
 
 let randomNumber,
+  randomSymbol,
   centeredHeight = (cellHeight - symbolHeight) / 2,
   centeredWidth = (cellWidth - symbolWidth) / 2;
 
 function drawImages() {
-  //for (let j = 0; j < tableDim; j++) {
   for (let i = 0; i <= tableDim; i++) {
-    randomNumber = generateRandomNumber();
+    randomSymbol = generateRandomNumber();
     board[0][i] = {
       y: (i - 1) * cellHeight + centeredHeight,
       x: centeredWidth,
-      img: symbols[randomNumber],
+      img: symbols[randomSymbol],
     };
     c.drawImage(
-      symbols[randomNumber],
+      symbols[randomSymbol],
+      0,
+      0,
+      symbols[randomSymbol].width,
+      symbols[randomSymbol].height,
       centeredWidth,
-      //j * cellWidth + centeredWidth,
       (i - 1) * cellHeight + centeredHeight,
       symbolWidth,
       symbolHeight
     );
   }
-  //}
 }
 
 let currentImg = generateRandomNumber(),
@@ -97,43 +119,26 @@ let animateCounter = 0,
   prevFinishedAnimate = lastAnimate / (tableDim - 1),
   spaceBlocked = false;
 
-let stoppedColumns = new Array(tableDim);
-stoppedColumns.fill(false, 0);
-
 function drawSymbol(currentSymbol, j) {
-  /*if (currentSymbol.y >= canvas.height) {
-    currentImg = generateRandomNumber();
-    currentSymbol.img = symbols[currentImg];
-    currentSymbol.y = -cellHeight + centeredHeight;
-  }
-  if (animateCounter >= lastAnimate + (i - 1) * prevFinishedAnimate) {
-    currentSymbol.y = (j - 1) * cellHeight + centeredHeight;
-    board[i][j] = currentSymbol;
-  }
-  c.drawImage(
-    currentSymbol.img,
-    i * cellWidth + centeredWidth,
-    currentSymbol.y,
-    symbolWidth,
-    symbolHeight
-  );
-  currentSymbol.y += movementSpeed;*/
   if (currentSymbol.y >= canvas.height) {
     currentImg = generateRandomNumber();
     currentSymbol.img = symbols[currentImg];
-    currentSymbol.y = -cellHeight + centeredHeight;
+    currentSymbol.y = -cellHeight + centeredHeight / 2;
   }
-  if (animateCounter + 1 === lastAnimate) {
+  if (animateCounter + 1 === lastAnimate)
     currentSymbol.y = (j - 1) * cellHeight + centeredHeight;
-    board[0][j] = currentSymbol;
-  }
   c.drawImage(
     currentSymbol.img,
+    0,
+    0,
+    currentSymbol.img.width,
+    currentSymbol.img.height,
     centeredWidth,
     currentSymbol.y,
     symbolWidth,
     symbolHeight
   );
+  board[0][j] = currentSymbol;
   currentSymbol.y += movementSpeed;
 }
 
@@ -142,105 +147,203 @@ function animateSymbols() {
     animateCounter = 0;
     cancelAnimationFrame(animateId);
     spaceBlocked = false;
-    stoppedColumns.fill(false, 0);
     checkWin();
   } else {
     if (animateCounter === animatesPerSecond * 2.5)
       movementSpeed = canvas.height / 60;
-    /*for (let i = 0; i < tableDim; i++) {
-      if (animateCounter >= lastAnimate + (i - 1) * prevFinishedAnimate) {
-        if (!stoppedColumns[i]) {
-          c.clearRect(i * cellWidth, 0, cellWidth, canvas.height);
-          for (let j = 0; j <= tableDim; j++) {
-            currentSymbol = board[i][j];
-            drawSymbol(currentSymbol, i, j);
-          }
-        } else stoppedColumns[i] = true;
-        continue;
-      }
-      c.clearRect(i * cellWidth, 0, cellWidth, canvas.height);
-      for (let j = 0; j <= tableDim; j++) {
-        currentSymbol = board[i][j];
-        drawSymbol(currentSymbol, i, j);
-      }
-    }*/
     c.clearRect(0, 0, cellWidth, canvas.height);
     for (let j = 0; j <= tableDim; j++) {
       currentSymbol = board[0][j];
       drawSymbol(currentSymbol, j);
     }
-    drawTable();
     animateCounter += 1;
     animateId = requestAnimationFrame(animateSymbols);
   }
 }
 
-let winningSymbols = [],
-  winSymbolCheck = "1",
-  parsedWinSymbolCheck = parseInt(winSymbolCheck),
-  currentSprite,
+let currentSprite,
   spriteAnimateCounter = 0,
   spriteAnimateTime = 40,
-  spriteDim = 260;
+  spriteDim = 260,
+  winningSymbol;
 
-function animateWinSymbols() {
+winCanvas.height = winCanvas.width = spriteDim;
+
+function animateWinSymbol() {
   if (currentTime - lastRender > spriteAnimateTime) {
     spriteAnimateCounter++;
     lastRender = Date.now();
   }
-  if (spriteAnimateCounter === 20) spriteAnimateCounter = 0;
-  winningSymbols.forEach((symbol) => {
-    c.clearRect(
-      centeredWidth,
-      symbol.y - movementSpeed,
-      symbolWidth,
-      symbolHeight
-    );
-    currentSprite = sprites[parsedWinSymbolCheck];
-    c.drawImage(
-      sprites[parsedWinSymbolCheck],
-      0,
-      spriteAnimateCounter * spriteDim,
-      spriteDim,
-      spriteDim,
-      symbol.x,
-      symbol.y - movementSpeed,
-      symbolWidth,
-      symbolHeight
-    );
-  });
+  if (spriteAnimateCounter >= 20) spriteAnimateCounter = 0;
+  winC.clearRect(0, 0, winCanvas.width, winCanvas.height);
+  winC.drawImage(
+    currentSprite,
+    0,
+    spriteAnimateCounter * spriteDim,
+    spriteDim,
+    spriteDim,
+    0,
+    0,
+    winCanvas.width,
+    winCanvas.height
+  );
   currentTime = Date.now();
-  spriteAnimateId = requestAnimationFrame(animateWinSymbols);
+  spriteAnimateId = requestAnimationFrame(animateWinSymbol);
+}
+
+const canvasContainer = document.querySelector(".canvas-container");
+
+function makeShadows() {
+  c.globalAlpha = 0.5;
+  c.clearRect(0, cellHeight * 2, cellWidth, cellHeight);
+  c.fillRect(0, 0, cellWidth, canvas.height);
+  c.globalAlpha = 1;
 }
 
 function animateWin() {
   currentTime = lastRender = Date.now();
-  animateWinSymbols();
+  winCanvas.style.display = "block";
+  makeShadows();
+  animateWinSymbol();
 }
+
+function getImageNumber() {
+  winningSymbol = board[0][tableDim - 2];
+  symbolImg = winningSymbol.img;
+  symbolSrcArray = symbolImg.src.split("/");
+  return symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
+}
+
+const imageContainers = document.querySelectorAll("img");
+const spanArray = document.querySelectorAll("span");
+
+let correctSpan, symbolImg, symbolSrcArray, symbolNumber;
 
 function checkWin() {
   document.body.style.pointerEvents = "auto";
-  historyImages.push(canvas.toDataURL());
-  let symbolNumber, symbolSrcArray, symbolImg;
-  for (let j = 0; j <= tableDim; j++) {
-    symbolImg = board[0][j].img;
-    symbolSrcArray = symbolImg.src.split("/");
-    symbolNumber = symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
-    if (symbolNumber === winSymbolCheck && board[0][j].y > 0)
-      winningSymbols.push(board[0][j]);
+  symbolNumber = getImageNumber();
+  currentSprite = sprites.find((sprite) =>
+    sprite.src.includes(`${symbolNumber}.png`)
+  );
+  if (symbolNumber == 10) {
+    spanArray.forEach((span) => (span.innerHTML = "0"));
+    scores.forEach((score) => (score.score = 0));
+  } else {
+    imageContainers.forEach((img) => {
+      symbolSrcArray = img.src.split("/");
+      if (
+        symbolSrcArray[symbolSrcArray.length - 1].includes(`${symbolNumber}`)
+      ) {
+        scores.forEach((score) => {
+          if (score.id === parseInt(symbolNumber)) {
+            correctSpan = img.parentNode.querySelector("span");
+            score.score++;
+            correctSpan.innerHTML = score.score;
+          }
+        });
+      }
+    });
   }
-  if (winningSymbols.length !== 0) animateWin();
+  animateWin();
 }
 
 function spin() {
+  getImages(0, false);
   spriteAnimateCounter = 0;
   document.body.style.pointerEvents = "none";
-  winningSymbols = [];
+  winCanvas.style.display = "none";
   currentTime = lastRender = Date.now();
-  animateSymbols();
+  let interval = setInterval(() => {
+    if (imagesLoaded) {
+      imagesLoaded = false;
+      clearInterval(interval);
+      animateSymbols();
+    }
+  });
 }
 
-drawTable();
+const scoreContainers = document.querySelectorAll(".score");
+const mainContainer = document.querySelector(".main");
+
+let containerHeight, containerWidth;
+
+let aspectRatioScreen = {
+  widthScale: 16,
+  heightScale: 9,
+};
+
+function resize(innerWidth, innerHeight) {
+  if (innerWidth > innerHeight) {
+    if (
+      gameHeight + 5 >= window.innerHeight &&
+      window.innerWidth >= gameWidth
+    ) {
+      gameHeight = innerHeight;
+      gameWidth = (gameHeight * 16) / 9;
+    } else {
+      gameWidth = innerWidth;
+      gameHeight = (gameWidth * 9) / 16;
+    }
+  } else {
+    if (
+      gameHeight + 5 >= window.innerHeight &&
+      window.innerWidth >= gameWidth
+    ) {
+      gameWidth = innerWidth;
+      gameHeight = (gameWidth * 16) / 9;
+    } else {
+      gameHeight = innerHeight;
+      gameWidth = (gameHeight * 9) / 16;
+    }
+  }
+
+  resizeElements(gameWidth, gameHeight);
+}
+
+function resizeElements(width, height) {
+  mainContainer.style.width = width + "px";
+  mainContainer.style.height = height + "px";
+}
+
+function proportionalScale(isLandscape) {
+  containerHeight = parseInt(mainContainer.style.height.split("p")[0]);
+  containerWidth = parseInt(mainContainer.style.width.split("p")[0]);
+  if (isLandscape) {
+    if (
+      containerHeight + 5 >= window.innerHeight &&
+      window.innerWidth >= containerWidth
+    ) {
+      mainContainer.style.height = `${window.innerHeight}px`;
+      mainContainer.style.width = `${
+        (parseFloat(window.innerHeight) * aspectRatioScreen.widthScale) /
+        aspectRatioScreen.heightScale
+      }px`;
+    } else {
+      mainContainer.style.width = `${window.innerWidth}px`;
+      mainContainer.style.height = `${
+        (parseFloat(window.innerWidth) * aspectRatioScreen.heightScale) /
+        aspectRatioScreen.widthScale
+      }px`;
+    }
+  } else {
+    if (
+      containerWidth + 5 >= window.innerWidth &&
+      window.innerHeight >= containerHeight
+    ) {
+      mainContainer.style.width = `${window.innerWidth}px`;
+      mainContainer.style.height = `${
+        (parseFloat(window.innerWidth) * aspectRatioScreen.widthScale) /
+        aspectRatioScreen.heightScale
+      }px`;
+    } else {
+      mainContainer.style.height = `${window.innerHeight}px`;
+      mainContainer.style.width = `${
+        (parseFloat(window.innerHeight) * aspectRatioScreen.heightScale) /
+        aspectRatioScreen.widthScale
+      }px`;
+    }
+  }
+}
 
 addEventListener("load", () => {
   let interval = setInterval(() => {
@@ -250,66 +353,25 @@ addEventListener("load", () => {
       clearInterval(interval);
     }
   });
+  scoreContainers.forEach((sc) => {
+    sc.style.width = `calc((${mainContainer.style.width}px - ${cellWidth}px) / 2)`;
+  });
+  proportionalScale(window.innerWidth > window.innerHeight);
 });
 
 addEventListener("keydown", (e) => {
   if (e.code === "Space" && !spaceBlocked) {
     movementSpeed = canvas.height / 15;
-    getImages(0, false);
     cancelAnimationFrame(spriteAnimateId);
     spaceBlocked = true;
     spin();
   }
 });
 
-// history
-
-/*const historyBtn = document.querySelector(".history-btn");
-const history = document.querySelector(".history");
-const historyScreen = document.querySelector(".history-screen");
-const historyCancel = document.querySelector(".history-cancel");
-const historyScreenImg = historyScreen.querySelector("img");
-const labelRange = document.querySelector(".current-img-label");
-const range = document.querySelector("input[type=range]");
-const rangeBtnPrev = document.querySelector(".range-btn.prev");
-const rangeBtnNext = document.querySelector(".range-btn.next");
-
-range.addEventListener("input", (e) => {
-  currentHistoryImg = e.target.value - 1;
-  historyScreenImg.src = historyImages[currentHistoryImg];
-  labelRange.innerHTML = `${currentHistoryImg + 1}/${historyImages.length}`;
-});
-
-function changePicture(isNext) {
-  if (isNext) {
-    if (currentHistoryImg !== historyImages.length - 1) currentHistoryImg++;
-  } else {
-    if (currentHistoryImg !== 0) currentHistoryImg--;
-  }
-  historyScreenImg.src = historyImages[currentHistoryImg];
-  labelRange.innerHTML = `${currentHistoryImg + 1}/${historyImages.length}`;
-  range.value = currentHistoryImg + 1;
-}
-
-rangeBtnNext.addEventListener("click", () => changePicture(true));
-
-rangeBtnPrev.addEventListener("click", () => changePicture(false));
-
-historyBtn.addEventListener("click", () => {
-  if (historyImages.length > 0) {
-    history.classList.add("active");
-    spaceBlocked = true;
-    currentHistoryImg = 0;
-    historyScreenImg.src = historyImages[currentHistoryImg];
-    range.min = 1;
-    range.max = historyImages.length;
-    range.step = 1;
-    range.value = 1;
-    labelRange.innerHTML = `${currentHistoryImg + 1}/${historyImages.length}`;
-  }
-});
-
-historyCancel.addEventListener("click", () => {
-  history.classList.remove("active");
-  spaceBlocked = false;
-});*/
+window.onresize = () => {
+  scoreContainers.forEach((sc) => {
+    sc.style.width = `'calc((100% - ${cellWidth}px) / 2)'`;
+  });
+  clearTimeout(proportionalScale(window.innerWidth > window.innerHeight));
+  proportionalScale(window.innerWidth > window.innerHeight);
+};

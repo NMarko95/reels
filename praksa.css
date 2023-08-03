@@ -13,110 +13,89 @@ body{
     justify-content: center;
 }
 
-canvas{
+.main{
     max-height: 100%;
     max-width: 100%;
-    background-color: #056905;
-    aspect-ratio: 1 / 5;
-}
-
-.history-btn{
-    position: absolute;
-    height: 50px;
-    width: 50px;
-    left: calc(50% - 25px);
-    bottom: 0;
-    background-color: #111;
-    color: #fff;
-    font-size: 20px;
-    border: none;
-    outline: none;
-    cursor: pointer;
-}
-
-.history{
-    height: 100vh;
-    width: 100vw;
-    display: none;
-    z-index: 10;
-    position: absolute;
-    top: 0;
-}
-
-.history.active{
     display: flex;
 }
 
-.history-options{
-    width: 30%;
-    color: #fff;
+.score{
+    width: 50%;
     height: 100%;
-    position: relative;
-    background-color: #545252;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: #4e4c4c;
+    color: #fff
+}
+
+.score-symbol{
+    width: 70%;
+    height: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 20px;
 }
 
-.history-cancel{
-    position: absolute;
-    top: 15px;
-    left: 25px;
-    background: none;
-    border: none;
-    outline: none;
-    font-size: 30px;
-    cursor: pointer;
-    color: #fff;
+.score-symbol > img{
+    width: 50%;
+    height: 50%;
+    object-fit: contain;
 }
 
-.buttons{
-    display: flex;
-    gap: 20px;
-    width: 100%;
-    justify-content: center;
-    height: 35px;
-}
-
-.current-img-label{
-    font-size: 20px;
-    letter-spacing: 2px;
-}
-
-.range-btn{
-    width: 35%;
-    height: 100%;
-    font-size: 15px;
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 5px;
-    outline: none;
-    background-color: #383636;
-    transition: 0.2s ease;
-}
-
-.range-btn:hover{
-    cursor: pointer;
-    transform: scale(1.1);
-}
-
-.range-btn:active{
-    background-color: #fff;
-    color: #111;
-}
-
-.history-screen{
-    width: 70%;
-    height: 100%;
+.score-symbol > span{
+    height: 20%;
+    font-size: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #056905;
 }
 
-.history-screen > img{
-    height: 60%;
-    width: 80%;
+.canvas-container{
+    display: flex;
+    position: relative;
+}
+
+.main-canvas{
+    background-color: #056905;
+    aspect-ratio: 1 / 5;
+    max-height: 100%;
+    order: 3;
+}
+
+.win-canvas{
+    max-height: 100%;
+    aspect-ratio: 1 / 1;
+    display: none;
+    position: absolute;
+    top: 40%;
+    height: 20%;
+    order: 3;
+}
+
+@media(orientation: portrait){
+
+    .score:nth-child(3){
+        order: 3;
+    }
+
+    .score{
+        justify-content: space-around;
+    }
+
+    .score-symbol{
+        height: 50%;
+        width: 100%;
+    }
+
+    .score-symbol > img{
+        height: 50%;
+        width: 80%;
+    }
+
+    .score-symbol > span{
+        font-size: 25px;
+    }
 }
