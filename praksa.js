@@ -48,10 +48,6 @@ let scores = [
   },
 ];
 
-function drawTable() {
-  c.strokeRect(0, 0, cellWidth, canvas.height);
-}
-
 function generateRandomNumber() {
   const randomNumber = Math.floor(Math.random() * availableSymbols.length);
   return randomNumber;
@@ -272,7 +268,7 @@ let aspectRatioScreen = {
   heightScale: 9,
 };
 
-function resize(innerWidth, innerHeight) {
+/*function resize(innerWidth, innerHeight) {
   if (innerWidth > innerHeight) {
     if (
       gameHeight + 5 >= window.innerHeight &&
@@ -303,6 +299,15 @@ function resize(innerWidth, innerHeight) {
 function resizeElements(width, height) {
   mainContainer.style.width = width + "px";
   mainContainer.style.height = height + "px";
+}*/
+
+function proportionalScaleCanvasScore() {
+  canvas.style.height = mainContainer.style.height;
+  canvas.style.width = `calc(${mainContainer.style.height} / 5)`;
+  winCanvas.style.height = winCanvas.style.width = canvas.style.width;
+  scoreContainers.forEach((sc) => {
+    sc.style.width = `calc((${mainContainer.style.width} - ${canvas.style.width}) / 2)`;
+  });
 }
 
 function proportionalScale(isLandscape) {
@@ -343,6 +348,7 @@ function proportionalScale(isLandscape) {
       }px`;
     }
   }
+  proportionalScaleCanvasScore();
 }
 
 addEventListener("load", () => {
@@ -352,9 +358,6 @@ addEventListener("load", () => {
       drawImages();
       clearInterval(interval);
     }
-  });
-  scoreContainers.forEach((sc) => {
-    sc.style.width = `calc((${mainContainer.style.width}px - ${cellWidth}px) / 2)`;
   });
   proportionalScale(window.innerWidth > window.innerHeight);
 });
@@ -369,9 +372,5 @@ addEventListener("keydown", (e) => {
 });
 
 window.onresize = () => {
-  scoreContainers.forEach((sc) => {
-    sc.style.width = `'calc((100% - ${cellWidth}px) / 2)'`;
-  });
-  clearTimeout(proportionalScale(window.innerWidth > window.innerHeight));
   proportionalScale(window.innerWidth > window.innerHeight);
 };

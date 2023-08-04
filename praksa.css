@@ -20,7 +20,6 @@ body{
 }
 
 .score{
-    width: 50%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -60,18 +59,15 @@ body{
 
 .main-canvas{
     background-color: #056905;
-    aspect-ratio: 1 / 5;
     max-height: 100%;
     order: 3;
 }
 
 .win-canvas{
     max-height: 100%;
-    aspect-ratio: 1 / 1;
     display: none;
     position: absolute;
     top: 40%;
-    height: 20%;
     order: 3;
 }
 
