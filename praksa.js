@@ -310,6 +310,8 @@ function proportionalScaleCanvasScore() {
   });
 }
 
+let onloadScale;
+
 function proportionalScale(isLandscape) {
   containerHeight = parseInt(mainContainer.style.height.split("p")[0]);
   containerWidth = parseInt(mainContainer.style.width.split("p")[0]);
@@ -324,11 +326,28 @@ function proportionalScale(isLandscape) {
         aspectRatioScreen.heightScale
       }px`;
     } else {
-      mainContainer.style.width = `${window.innerWidth}px`;
-      mainContainer.style.height = `${
-        (parseFloat(window.innerWidth) * aspectRatioScreen.heightScale) /
-        aspectRatioScreen.widthScale
-      }px`;
+      // slucaj za onload
+      if (mainContainer.style.height === "") {
+        if (onloadScale > 1.7778) {
+          mainContainer.style.height = `${window.innerHeight}px`;
+          mainContainer.style.width = `${
+            (parseFloat(window.innerHeight) * aspectRatioScreen.widthScale) /
+            aspectRatioScreen.heightScale
+          }px`;
+        } else {
+          mainContainer.style.width = `${window.innerWidth}px`;
+          mainContainer.style.height = `${
+            (parseFloat(window.innerWidth) * aspectRatioScreen.heightScale) /
+            aspectRatioScreen.widthScale
+          }px`;
+        }
+      } else {
+        mainContainer.style.width = `${window.innerWidth}px`;
+        mainContainer.style.height = `${
+          (parseFloat(window.innerWidth) * aspectRatioScreen.heightScale) /
+          aspectRatioScreen.widthScale
+        }px`;
+      }
     }
   } else {
     if (
@@ -341,11 +360,28 @@ function proportionalScale(isLandscape) {
         aspectRatioScreen.heightScale
       }px`;
     } else {
-      mainContainer.style.height = `${window.innerHeight}px`;
-      mainContainer.style.width = `${
-        (parseFloat(window.innerHeight) * aspectRatioScreen.heightScale) /
-        aspectRatioScreen.widthScale
-      }px`;
+      // slucaj za onload
+      if (mainContainer.style.width === "") {
+        if (onloadScale < 0.5625) {
+          mainContainer.style.width = `${window.innerWidth}px`;
+          mainContainer.style.height = `${
+            (window.innerWidth * aspectRatioScreen.widthScale) /
+            aspectRatioScreen.heightScale
+          }px`;
+        } else {
+          mainContainer.style.height = `${window.innerHeight}px`;
+          mainContainer.style.width = `${
+            (parseFloat(window.innerHeight) * aspectRatioScreen.heightScale) /
+            aspectRatioScreen.widthScale
+          }px`;
+        }
+      } else {
+        mainContainer.style.height = `${window.innerHeight}px`;
+        mainContainer.style.width = `${
+          (parseFloat(window.innerHeight) * aspectRatioScreen.heightScale) /
+          aspectRatioScreen.widthScale
+        }px`;
+      }
     }
   }
   proportionalScaleCanvasScore();
@@ -359,6 +395,7 @@ addEventListener("load", () => {
       clearInterval(interval);
     }
   });
+  onloadScale = innerWidth / innerHeight;
   proportionalScale(window.innerWidth > window.innerHeight);
 });
 
