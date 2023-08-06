@@ -363,9 +363,9 @@ function proportionalScale(isLandscape) {
       // slucaj za onload
       if (mainContainer.style.width === "") {
         if (onloadScale < 0.5625) {
-          mainContainer.style.width = `${window.innerWidth}px`;
+          mainContainer.style.width = `${window.outerWidth}px`;
           mainContainer.style.height = `${
-            (window.innerWidth * aspectRatioScreen.widthScale) /
+            (window.outerWidth * aspectRatioScreen.widthScale) /
             aspectRatioScreen.heightScale
           }px`;
         } else {
@@ -409,5 +409,6 @@ addEventListener("keydown", (e) => {
 });
 
 window.onresize = () => {
+  console.log("resized");
   proportionalScale(window.innerWidth > window.innerHeight);
 };
