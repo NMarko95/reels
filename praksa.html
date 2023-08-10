@@ -10,29 +10,65 @@
 
 <body>
     <main class="main">
-        <div class="score">
-            <div class="score-symbol">
-                <img src="/images/Symbols/3.png" />
-                <span>0</span>
+        <div class="game">
+            <div class="score">
+                <div class="table">
+                    <div class="th">
+                        <img src="./images/Symbols/3.png" alt="">
+                    </div>
+                    <div class="td">x10</div>
+                    <div class="td">x8</div>
+                    <div class="td">x6</div>
+                    <div class="td">x4</div>
+                    <div class="td">x2</div>
+                </div>
+                <div class="table">
+                    <div class="th">
+                        <img src="./images/Symbols/7.png" alt="">
+                    </div>
+                    <div class="td">x9</div>
+                    <div class="td">x7</div>
+                    <div class="td">x5</div>
+                    <div class="td">x3</div>
+                    <div class="td">x1</div>
+                </div>
             </div>
-            <div class="score-symbol">
-                <img src="/images/Symbols/7.png" />
-                <span>0</span>
+            <div class="canvas-container">
+                <canvas class="main-canvas"></canvas>
+                <canvas class="win-canvas"></canvas>
             </div>
+            <div class="score">
+                <div class="table">
+                    <div class="th">
+                        <img src="./images/Symbols/5.png" alt="">
+                    </div>
+                    <div class="td">x10</div>
+                    <div class="td">x8</div>
+                    <div class="td">x6</div>
+                    <div class="td">x4</div>
+                    <div class="td">x2</div>
+                </div>
+                <div class="table">
+                    <div class="th">
+                        <img src="./images/Symbols/8.png" alt="">
+                    </div>
+                    <div class="td">x9</div>
+                    <div class="td">x7</div>
+                    <div class="td">x5</div>
+                    <div class="td">x3</div>
+                    <div class="td">x1</div>
+                </div>
+            </div>
+
         </div>
-        <div class="canvas-container">
-            <canvas class="main-canvas"></canvas>
-            <canvas class="win-canvas"></canvas>
-        </div>
-        <div class="score">
-            <div class="score-symbol">
-                <img src="/images/Symbols/8.png" />
-                <span>0</span>
+        <div class="options">
+            <div class="info">
+                <div class="info-element">BALANCE: <span class="bank"></span></div>
+                <div class="info-element">BET: <span class="bet"></span></div>
+                <div class="info-element">BANK: <span class="balance"></span></div>
             </div>
-            <div class="score-symbol">
-                <img src="/images/Symbols/5.png" />
-                <span>0</span>
-            </div>
+            <button class="spin-btn">SPIN</button>
+            <button class="collect-btn">COLLECT</button>
         </div>
     </main>
     <script src="praksa.js" type="module"></script>

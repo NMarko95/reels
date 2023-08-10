@@ -7,7 +7,7 @@
 body{
     width: 100vw;
     height: 100vh;
-    background-color: #111;
+    background-color: #242323;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17,39 +17,123 @@ body{
     max-height: 100%;
     max-width: 100%;
     display: flex;
+    flex-direction: column;
+}
+
+.game{
+    display: flex;
+    height: 85%;
+    width: 100%;
 }
 
 .score{
     height: 100%;
+    background-color: #525050;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
-    background-color: #4e4c4c;
-    color: #fff
-}
-
-.score-symbol{
-    width: 70%;
-    height: 50%;
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    align-items: center;
+    gap: 5%;
 }
 
-.score-symbol > img{
-    width: 50%;
-    height: 50%;
+.table{
+    height: 45%;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+}
+
+.th{
+    height: 30%;
+    width: 25%;
+}
+
+.th > img{
+    height: 100%;
+    aspect-ratio: 1 / 1;
     object-fit: contain;
 }
 
-.score-symbol > span{
-    height: 20%;
-    font-size: 100%;
+.td{
+    height: 12%;
+    width: 30%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid #fff;
+    font-size: 18px;
+    margin: 1% 0;
+}
+
+.options{
+    height: 15%;
+    width: 100%;
+    background-color: #242323;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    gap: 5%;
+    color: #fff;
+}
+
+.buttons{
+    width: 100%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.collect-btn, .spin-btn{
+    height: 70%;
+    width: 25%;
+    font-size: 15px;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+    background-color: #056905;
+    color: #fff;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.spin-btn{
+    background-color: #990505;
+}
+
+.collect-btn:hover, .spin-btn:hover{
+    transform: scale(1.1);
+}
+
+.collect-btn:active{
+    color: #056905;
+    background-color: #fff;
+}
+
+.spin-btn:active{
+    color: #990505;
+    background-color: #fff;
+}
+
+.info{
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.info-element{
+    height: 45%;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10%;
+    font-size: 16px;
 }
 
 .canvas-container{
@@ -67,31 +151,23 @@ body{
     max-height: 100%;
     display: none;
     position: absolute;
-    top: 40%;
     order: 3;
 }
 
 @media(orientation: portrait){
 
-    .score:nth-child(3){
-        order: 3;
-    }
-
-    .score{
-        justify-content: space-around;
-    }
-
-    .score-symbol{
+    .collect-btn, .spin-btn{
+        width: 25%;
         height: 50%;
+        font-size: 18px;
+    }
+
+    .th{
         width: 100%;
     }
 
-    .score-symbol > img{
-        height: 50%;
-        width: 80%;
-    }
-
-    .score-symbol > span{
-        font-size: 25px;
+    .td{
+        width: 70%;
+        height: 13%;
     }
 }
