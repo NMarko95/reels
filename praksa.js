@@ -101,6 +101,10 @@ function getImages(counter, isSymbols) {
   };
 }
 
+const backgroundAudio = new Audio("./sounds/background.mp3");
+backgroundAudio.volume = 0.2;
+backgroundAudio.loop = true;
+
 getImages(0, true);
 
 let randomNumber,
@@ -393,6 +397,7 @@ function wild() {
 }
 
 function spin() {
+  if (backgroundAudio.paused) backgroundAudio.play();
   audio?.pause();
   audio = new Audio("./sounds/roll.mp3");
   audio.play();
