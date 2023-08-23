@@ -1,11 +1,15 @@
-// selectors
 const canvas = document.querySelector(".main-canvas");
-const c = canvas.getContext("2d");
+const context = canvas.getContext("2d");
 
 const winCanvas = document.querySelector(".win-canvas");
-const winC = winCanvas.getContext("2d");
+const winContext = winCanvas.getContext("2d");
 
 const gameContainer = document.querySelector(".game");
+gameContainer.style.display = "none";
+
+const options = document.querySelector(".options");
+options.style.display = "none";
+
 const canvasContainer = document.querySelector(".canvas-container");
 const tableHeads = document.querySelectorAll(".th");
 const bankSpan = document.querySelector(".bank");
@@ -22,25 +26,25 @@ const mainContainer = document.querySelector(".main");
 
 let image, animateId, spriteAnimateId;
 
+let tableDim = 3,
+  spriteDim = 260;
+
 let board = [],
   sprites = [];
-for (let i = 0; i < 5; i++) {
-  board[i] = new Array(5);
+
+for (let i = 0; i < tableDim; i++) {
+  board[i] = new Array(tableDim);
 }
 
 let currentTime, lastRender;
 
-let tableDim = 5,
-  spriteDim = 260;
+canvas.height = canvas.width = spriteDim;
 
-canvas.height = spriteDim * 5;
-canvas.width = spriteDim;
+const cellWidth = canvas.width,
+  cellHeight = canvas.height;
 
-const cellWidth = canvas.width;
-const cellHeight = canvas.height / 5;
-
-const symbolHeight = cellHeight / 1.5;
-const symbolWidth = cellWidth / 1.5;
+const symbolHeight = cellHeight / 1.25,
+  symbolWidth = cellWidth / 1.25;
 
 let gameWidth, gameHeight;
 
@@ -74,13 +78,12 @@ let scores = [
 ];
 
 function generateRandomNumber() {
-  const randomNumber = Math.floor(Math.random() * availableSymbols.length);
+  randomNumber = Math.floor(Math.random() * availableSymbols.length);
   return randomNumber;
 }
 
 let symbols = [],
-  imagesLoaded = false,
-  backgroundLoaded = false;
+  imagesLoaded = false;
 
 function getImages(counter, isSymbols) {
   if (counter === availableSymbols.length) {
@@ -102,7 +105,7 @@ function getImages(counter, isSymbols) {
 }
 
 const backgroundAudio = new Audio("./sounds/background.mp3");
-backgroundAudio.volume = 0.2;
+backgroundAudio.volume = 0.5;
 backgroundAudio.loop = true;
 
 getImages(0, true);
@@ -113,7 +116,7 @@ let randomNumber,
   centeredWidth = (cellWidth - symbolWidth) / 2;
 
 function drawImages(isCollect) {
-  for (let i = 0; i <= tableDim; i++) {
+  for (let i = 0; i < tableDim; i++) {
     if (!isCollect) {
       randomSymbol = generateRandomNumber();
       board[0][i] = {
@@ -121,7 +124,7 @@ function drawImages(isCollect) {
         x: centeredWidth,
         img: symbols[randomSymbol],
       };
-      c.drawImage(
+      context.drawImage(
         symbols[randomSymbol],
         0,
         0,
@@ -133,7 +136,7 @@ function drawImages(isCollect) {
         symbolHeight
       );
     } else {
-      c.drawImage(
+      context.drawImage(
         board[0][i].img,
         0,
         0,
@@ -153,11 +156,12 @@ let currentImg = generateRandomNumber(),
 
 let animateCounter = 0,
   currentSymbol,
-  movementSpeed = canvas.height / 20,
+  movementSpeed = canvas.height / 5,
   animatesPerSecond = 62,
   lastAnimate = animatesPerSecond * 1.5,
   prevFinishedAnimate = lastAnimate / (tableDim - 1),
-  spaceBlocked = false;
+  spaceBlocked = true,
+  slowSpeed = movementSpeed / 3;
 
 function drawSymbol(currentSymbol, j) {
   if (currentSymbol.y >= canvas.height) {
@@ -167,7 +171,7 @@ function drawSymbol(currentSymbol, j) {
   }
   if (animateCounter + 1 === lastAnimate)
     currentSymbol.y = (j - 1) * cellHeight + centeredHeight;
-  c.drawImage(
+  context.drawImage(
     currentSymbol.img,
     0,
     0,
@@ -189,10 +193,9 @@ function animateSymbols() {
     spaceBlocked = false;
     checkWin();
   } else {
-    if (animateCounter === animatesPerSecond)
-      movementSpeed = canvas.height / 60;
-    c.clearRect(0, 0, cellWidth, canvas.height);
-    for (let j = 0; j <= tableDim; j++) {
+    if (animateCounter === animatesPerSecond) movementSpeed = slowSpeed;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (let j = 0; j < tableDim; j++) {
       currentSymbol = board[0][j];
       drawSymbol(currentSymbol, j);
     }
@@ -214,8 +217,8 @@ function animateWinSymbol() {
     lastRender = Date.now();
   }
   if (spriteAnimateCounter >= 20) spriteAnimateCounter = 0;
-  winC.clearRect(0, 0, winCanvas.width, winCanvas.height);
-  winC.drawImage(
+  winContext.clearRect(0, 0, winCanvas.width, winCanvas.height);
+  winContext.drawImage(
     currentSprite,
     0,
     spriteAnimateCounter * spriteDim,
@@ -231,10 +234,10 @@ function animateWinSymbol() {
 }
 
 function makeShadows() {
-  c.globalAlpha = 0.5;
-  c.clearRect(0, cellHeight * 2, cellWidth, cellHeight);
-  c.fillRect(0, 0, cellWidth, canvas.height);
-  c.globalAlpha = 1;
+  context.globalAlpha = 0.5;
+  context.clearRect(0, cellHeight * 2, cellWidth, cellHeight);
+  context.fillRect(0, 0, cellWidth, canvas.height);
+  context.globalAlpha = 1;
 }
 
 function animateWin() {
@@ -251,8 +254,7 @@ function getImageNumber() {
   return symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
 }
 
-let correctSpan,
-  symbolImg,
+let symbolImg,
   symbolSrcArray,
   symbolNumber,
   currentColumnImg,
@@ -261,7 +263,7 @@ let correctSpan,
   audio;
 
 function checkWin() {
-  audio.pause();
+  audio?.pause();
   document.body.style.pointerEvents = "auto";
   symbolNumber = getImageNumber();
   currentSprite = sprites.find((sprite) =>
@@ -269,11 +271,11 @@ function checkWin() {
   );
   if (symbolNumber == 10) {
     audio = new Audio("./sounds/scatter.mp3");
-    audio.play();
+    soundEnabled && audio.play();
     scatter();
   } else if (symbolNumber == 0) {
     audio = new Audio("./sounds/wild.mp3");
-    audio.play();
+    soundEnabled && audio.play();
     wild();
   } else {
     tableHeads.forEach((th, i) => {
@@ -308,7 +310,7 @@ function checkWin() {
       }
     });
     audio = new Audio("./sounds/win.mp3");
-    audio.play();
+    soundEnabled && audio.play();
   }
   checkDisabled();
   animateWin();
@@ -335,11 +337,9 @@ function checkDisabled() {
 
 function collectMoney() {
   audio = new Audio("./sounds/collect.mp3");
-  audio.play();
+  soundEnabled && audio.play();
   scores.forEach((score) => {
-    if (score.active) {
-      currentScore = bet * score.multiplier;
-    }
+    if (score.active) currentScore = bet * score.multiplier;
     winAmount += currentScore;
     currentScore = 0;
   });
@@ -349,8 +349,8 @@ function collectMoney() {
   bankSpan.innerHTML = currentBank;
   winAmount = 0;
   scatter();
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  winC.clearRect(0, 0, winCanvas.width, winCanvas.height);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  winContext.clearRect(0, 0, winCanvas.width, winCanvas.height);
   cancelAnimationFrame(spriteAnimateId);
   isDisabled = true;
   checkDisabled();
@@ -373,7 +373,7 @@ function scatter() {
 }
 
 function wild() {
-  scores.map((score, i) => {
+  scores.forEach((score, i) => {
     if (score.active && score.multiplier <= 9) {
       score.multiplier += 2;
       currentScoreIndex = i;
@@ -384,7 +384,6 @@ function wild() {
       if (score.active) currentWinning += bet * score.multiplier;
     });
     balanceSpan.innerHTML = currentWinning;
-    return score;
   });
   tables.forEach((table, i) => {
     if (scores[i].currentLevel > 0) {
@@ -397,10 +396,11 @@ function wild() {
 }
 
 function spin() {
-  if (backgroundAudio.paused) backgroundAudio.play();
-  audio?.pause();
-  audio = new Audio("./sounds/roll.mp3");
-  audio.play();
+  if (soundEnabled) {
+    audio?.pause();
+    audio = new Audio("./sounds/roll.mp3");
+    audio.play();
+  }
   getImages(0, false);
   spriteAnimateCounter = 0;
   currentBank -= bet;
@@ -408,13 +408,7 @@ function spin() {
   document.body.style.pointerEvents = "none";
   winCanvas.style.display = "none";
   currentTime = lastRender = Date.now();
-  let interval = setInterval(() => {
-    if (imagesLoaded) {
-      imagesLoaded = false;
-      clearInterval(interval);
-      animateSymbols();
-    }
-  });
+  animateSymbols();
 }
 
 const spinBtn = document.querySelector(".spin-btn");
@@ -425,8 +419,6 @@ spinBtn.addEventListener("click", (e) => {
   spaceBlocked = true;
   spin();
 });
-
-let containerHeight, containerWidth;
 
 let aspectRatioScreen = {
   widthScale: 16,
@@ -472,23 +464,17 @@ function resizeElements(width, height) {
 }
 
 function proportionalScaleCanvasScore() {
-  canvas.style.height = `calc(${mainContainer.style.height} * 0.85)`;
-  canvas.style.width = `calc(${canvas.style.height} / 5)`;
-  winCanvas.style.height =
-    winCanvas.style.width = `calc(${canvas.style.width} / 1.5)`;
-  winCanvas.style.top = `calc(${canvas.style.height} * 0.4 + ${canvas.style.height} / 30)`;
-  winCanvas.style.left = `calc(${winCanvas.style.width} / 4)`;
-  scoreContainers.forEach(
-    (sc) =>
-      (sc.style.width = `calc((${mainContainer.style.width} - ${canvas.style.width}) / 2)`)
-  );
+  canvas.style.height = `calc(${mainContainer.style.height} / 5)`;
+  winCanvas.style.height = `calc(${canvas.style.height} / 1.5)`;
 }
 
-let onloadScale;
+let onloadScale,
+  soundEnabled = false;
 
-addEventListener("load", () => {
+function playGame() {
   let interval = setInterval(() => {
     if (imagesLoaded) {
+      soundEnabled && backgroundAudio.play();
       imagesLoaded = false;
       checkDisabled();
       drawImages(false);
@@ -497,6 +483,23 @@ addEventListener("load", () => {
       clearInterval(interval);
     }
   });
+}
+
+const soundBtn = document.querySelectorAll(".sound-btn");
+const buttonsDiv = document.querySelector(".sound-popup");
+soundBtn.forEach((sb) => {
+  sb.addEventListener("click", () => {
+    if (sb.classList.contains("yes")) soundEnabled = true;
+    gameContainer.style.display = options.style.display = "flex";
+    buttonsDiv.style.display = "none";
+    spaceBlocked = false;
+    playGame();
+  });
+});
+
+addEventListener("load", () => {
+  onloadScale = innerWidth / innerHeight;
+  resize();
 });
 
 addEventListener("keydown", (e) => {
