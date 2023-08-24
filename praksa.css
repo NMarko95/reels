@@ -94,6 +94,8 @@ body{
 .th{
     height: 30%;
     width: 25%;
+    display: flex;
+    justify-content: center;
 }
 
 .th > img{
@@ -189,7 +191,7 @@ body{
     aspect-ratio: 1 / 1;
     position: absolute;
     top: 40%;
-    left: 45%;
+    left: 46%;
     order: 3;
 }
 
@@ -199,8 +201,43 @@ body{
     display: none;
     position: absolute;
     top: 42%;
-    left: 46%;
+    left: 47%;
     order: 3;
+}
+
+.wild-info, .scatter-info{
+    position: absolute;
+    left: 41%;
+    width: 20%;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5%;
+}
+
+.wild-info{
+    top: 5%;
+}
+
+.scatter-info{
+    bottom: 5%;
+}
+
+.wild-info > img, .scatter-info > img{
+    height: 50%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
+.wild-info > p, .scatter-info > p{
+    font-size: 10px;
+    color: #f7f2f2;
+    padding: 5px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.5;
 }
 
 @media(orientation: portrait){
@@ -229,4 +266,31 @@ body{
     .info{
         font-size: 10px;
     }
+
+    .win-canvas{
+        max-height: 12%;
+        top: 41.5%;
+        left: 42.2%;
+    }
+
+    .main-canvas{
+        top: 40%;
+        left: 40%;
+        max-height: 15%;
+    }
+
+    .score:nth-child(1){
+        align-items: flex-start;
+        padding-left: 5%;
+    }
+
+    .score:nth-child(6){
+        align-items: flex-end;
+        padding-right: 5%;
+    }
+
+    .wild-info, .scatter-info{
+        left: 40%;
+    }
+    
 }

@@ -1,32 +1,32 @@
-const canvas = document.querySelector(".main-canvas");
+const canvas = document.getElementsByClassName("main-canvas")[0];
 const context = canvas.getContext("2d");
 
-const winCanvas = document.querySelector(".win-canvas");
+const winCanvas = document.getElementsByClassName("win-canvas")[0];
 const winContext = winCanvas.getContext("2d");
 
-const gameContainer = document.querySelector(".game");
+const gameContainer = document.getElementsByClassName("game")[0];
 gameContainer.style.display = "none";
 
-const options = document.querySelector(".options");
+const options = document.getElementsByClassName("options")[0];
 options.style.display = "none";
 
-const canvasContainer = document.querySelector(".canvas-container");
+const canvasContainer = document.getElementsByClassName("canvas-container")[0];
 const tableHeads = document.querySelectorAll(".th");
-const bankSpan = document.querySelector(".bank");
-const betSpan = document.querySelector(".bet");
-const balanceSpan = document.querySelector(".balance");
+const bankSpan = document.getElementsByClassName("bank")[0];
+const betSpan = document.getElementsByClassName("bet")[0];
+const balanceSpan = document.getElementsByClassName("balance")[0];
 
-const collectBtn = document.querySelector(".collect-btn");
+const collectBtn = document.getElementsByClassName("collect-btn")[0];
 collectBtn.addEventListener("click", collectMoney);
 
 const tables = document.querySelectorAll(".table");
 
-const scoreContainers = document.querySelectorAll(".score");
-const mainContainer = document.querySelector(".main");
+const scoreContainers = document.getElementsByClassName("score");
+const mainContainer = document.getElementsByClassName("main")[0];
 
 let image, animateId, spriteAnimateId;
 
-let tableDim = 3,
+let tableDim = 2,
   spriteDim = 260;
 
 let board = [],
@@ -38,13 +38,14 @@ for (let i = 0; i < tableDim; i++) {
 
 let currentTime, lastRender;
 
-canvas.height = canvas.width = spriteDim;
+canvas.height = spriteDim * tableDim;
+canvas.width = spriteDim;
 
-const cellWidth = canvas.width,
+let cellWidth = canvas.width,
   cellHeight = canvas.height;
 
-const symbolHeight = cellHeight / 1.25,
-  symbolWidth = cellWidth / 1.25;
+let symbolHeight = cellHeight / 1.3,
+  symbolWidth = cellWidth / 1.3;
 
 let gameWidth, gameHeight;
 
@@ -143,7 +144,7 @@ function drawImages(isCollect) {
         board[0][i].img.width,
         board[0][i].img.height,
         centeredWidth,
-        (i - 1) * cellHeight + centeredHeight,
+        winningSymbol.img.src === board[0][i].img.src ? tops[1] : tops[0],
         symbolWidth,
         symbolHeight
       );
@@ -156,12 +157,14 @@ let currentImg = generateRandomNumber(),
 
 let animateCounter = 0,
   currentSymbol,
-  movementSpeed = canvas.height / 5,
-  animatesPerSecond = 62,
-  lastAnimate = animatesPerSecond * 1.5,
-  prevFinishedAnimate = lastAnimate / (tableDim - 1),
+  speed = canvas.height / 10,
+  fullAnimateCircle = 1000,
   spaceBlocked = true,
-  slowSpeed = movementSpeed / 3;
+  slowingSpeed = speed / 3,
+  animationData = {
+    movementSpeed: speed,
+  },
+  stoppingJ;
 
 function drawSymbol(currentSymbol, j) {
   if (currentSymbol.y >= canvas.height) {
@@ -169,8 +172,11 @@ function drawSymbol(currentSymbol, j) {
     currentSymbol.img = symbols[currentImg];
     currentSymbol.y = -cellHeight;
   }
-  if (animateCounter + 1 === lastAnimate)
-    currentSymbol.y = (j - 1) * cellHeight + centeredHeight;
+  if (
+    animationData.movementSpeed === slowingSpeed &&
+    board[0][stoppingJ].y >= tops[1]
+  )
+    animationData.movementSpeed = 0;
   context.drawImage(
     currentSymbol.img,
     0,
@@ -183,17 +189,33 @@ function drawSymbol(currentSymbol, j) {
     symbolHeight
   );
   board[0][j] = currentSymbol;
-  currentSymbol.y += movementSpeed;
+  currentSymbol.y += animationData.movementSpeed;
+}
+
+let isStopping = false,
+  value;
+
+let tops = [];
+
+for (let i = 0; i < tableDim; i++) {
+  tops[i] = parseInt((i - 1) * cellHeight + centeredHeight);
 }
 
 function animateSymbols() {
-  if (animateCounter === lastAnimate) {
+  if (animationData.movementSpeed === 0) {
     animateCounter = 0;
     cancelAnimationFrame(animateId);
     spaceBlocked = false;
+    for (let i = 0; i < tableDim; i++) board[0][i].y = tops[i];
     checkWin();
   } else {
-    if (animateCounter === animatesPerSecond) movementSpeed = slowSpeed;
+    if (
+      currentTime - lastRender >= fullAnimateCircle &&
+      animationData.movementSpeed === speed
+    ) {
+      animationData.movementSpeed = slowingSpeed;
+      stoppingJ = findClosestValue();
+    }
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (let j = 0; j < tableDim; j++) {
       currentSymbol = board[0][j];
@@ -201,7 +223,13 @@ function animateSymbols() {
     }
     animateCounter += 1;
     animateId = requestAnimationFrame(animateSymbols);
+    if (animationData.movementSpeed !== slowingSpeed) currentTime = Date.now();
   }
+}
+
+function findClosestValue() {
+  value = board[0][0].y < 0 ? 0 : 1;
+  return value;
 }
 
 let currentSprite,
@@ -209,7 +237,8 @@ let currentSprite,
   spriteAnimateTime = 40,
   winningSymbol;
 
-winCanvas.height = winCanvas.width = spriteDim;
+winCanvas.height = cellHeight;
+winCanvas.width = cellWidth;
 
 function animateWinSymbol() {
   if (currentTime - lastRender > spriteAnimateTime) {
@@ -279,7 +308,7 @@ function checkWin() {
     wild();
   } else {
     tableHeads.forEach((th, i) => {
-      currentColumnImg = th.querySelector("img");
+      currentColumnImg = th.getElementsByTagName("img")[0];
       if (currentColumnImg.src.includes(`${symbolNumber}.png`)) {
         scores.map((score, i) => {
           if (
@@ -302,7 +331,9 @@ function checkWin() {
         });
         if (scores[i].currentLevel > 0) {
           currentTd =
-            th.parentNode.querySelectorAll(".td")[scores[i].currentLevel - 1];
+            th.parentNode.getElementsByClassName("td")[
+              scores[i].currentLevel - 1
+            ];
           currentTd.style.color = "#680ab6";
           currentTd.style.backgroundColor = "#fff";
           scores[i].currentLevel -= 1;
@@ -411,10 +442,10 @@ function spin() {
   animateSymbols();
 }
 
-const spinBtn = document.querySelector(".spin-btn");
+const spinBtn = document.getElementsByClassName("spin-btn")[0];
 spinBtn.addEventListener("click", (e) => {
   e.target.blur();
-  movementSpeed = canvas.height / 20;
+  animationData.movementSpeed = speed;
   cancelAnimationFrame(spriteAnimateId);
   spaceBlocked = true;
   spin();
@@ -486,7 +517,7 @@ function playGame() {
 }
 
 const soundBtn = document.querySelectorAll(".sound-btn");
-const buttonsDiv = document.querySelector(".sound-popup");
+const buttonsDiv = document.getElementsByClassName("sound-popup")[0];
 soundBtn.forEach((sb) => {
   sb.addEventListener("click", () => {
     if (sb.classList.contains("yes")) soundEnabled = true;
@@ -504,7 +535,7 @@ addEventListener("load", () => {
 
 addEventListener("keydown", (e) => {
   if (e.code === "Space" && !spaceBlocked) {
-    movementSpeed = canvas.height / 20;
+    animationData.movementSpeed = speed;
     cancelAnimationFrame(spriteAnimateId);
     spaceBlocked = true;
     spin();
