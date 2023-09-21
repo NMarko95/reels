@@ -10,7 +10,6 @@ gameContainer.style.display = "none";
 const options = document.getElementsByClassName("options")[0];
 options.style.display = "none";
 
-const canvasContainer = document.getElementsByClassName("canvas-container")[0];
 const tableHeads = document.querySelectorAll(".th");
 const bankSpan = document.getElementsByClassName("bank")[0];
 const betSpan = document.getElementsByClassName("bet")[0];
@@ -21,10 +20,12 @@ collectBtn.addEventListener("click", collectMoney);
 
 const tables = document.querySelectorAll(".table");
 
-const scoreContainers = document.getElementsByClassName("score");
 const mainContainer = document.getElementsByClassName("main")[0];
 
-let image, animateId, spriteAnimateId;
+let image,
+  spriteAnimateId = {
+    id: 0,
+  };
 
 let tableDim = 2,
   spriteDim = 260;
@@ -84,7 +85,8 @@ function generateRandomNumber() {
 }
 
 let symbols = [],
-  imagesLoaded = false;
+  imagesLoaded = false,
+  animateCounter;
 
 function getImages(counter, isSymbols) {
   if (counter === availableSymbols.length) {
@@ -152,129 +154,18 @@ function drawImages(isCollect) {
   }
 }
 
-let currentImg = generateRandomNumber(),
-  animationId;
-
-let animateCounter = 0,
-  currentSymbol,
-  speed = canvas.height / 10,
-  fullAnimateCircle = 1000,
-  spaceBlocked = true,
-  slowingSpeed = speed / 3,
-  animationData = {
-    movementSpeed: speed,
-  },
-  stoppingJ;
-
-function drawSymbol(currentSymbol, j) {
-  if (currentSymbol.y >= canvas.height) {
-    currentImg = generateRandomNumber();
-    currentSymbol.img = symbols[currentImg];
-    currentSymbol.y = -cellHeight;
-  }
-  if (
-    animationData.movementSpeed === slowingSpeed &&
-    board[0][stoppingJ].y >= tops[1]
-  )
-    animationData.movementSpeed = 0;
-  context.drawImage(
-    currentSymbol.img,
-    0,
-    0,
-    currentSymbol.img.width,
-    currentSymbol.img.height,
-    centeredWidth,
-    currentSymbol.y,
-    symbolWidth,
-    symbolHeight
-  );
-  board[0][j] = currentSymbol;
-  currentSymbol.y += animationData.movementSpeed;
-}
-
-let isStopping = false,
-  value;
-
+let spaceBlocked = true;
+let speed = canvas.height / 10;
 let tops = [];
 
 for (let i = 0; i < tableDim; i++) {
   tops[i] = parseInt((i - 1) * cellHeight + centeredHeight);
 }
 
-function animateSymbols() {
-  if (animationData.movementSpeed === 0) {
-    animateCounter = 0;
-    cancelAnimationFrame(animateId);
-    spaceBlocked = false;
-    for (let i = 0; i < tableDim; i++) board[0][i].y = tops[i];
-    checkWin();
-  } else {
-    if (
-      currentTime - lastRender >= fullAnimateCircle &&
-      animationData.movementSpeed === speed
-    ) {
-      animationData.movementSpeed = slowingSpeed;
-      stoppingJ = findClosestValue();
-    }
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    for (let j = 0; j < tableDim; j++) {
-      currentSymbol = board[0][j];
-      drawSymbol(currentSymbol, j);
-    }
-    animateCounter += 1;
-    animateId = requestAnimationFrame(animateSymbols);
-    if (animationData.movementSpeed !== slowingSpeed) currentTime = Date.now();
-  }
-}
-
-function findClosestValue() {
-  value = board[0][0].y < 0 ? 0 : 1;
-  return value;
-}
-
-let currentSprite,
-  spriteAnimateCounter = 0,
-  spriteAnimateTime = 40,
-  winningSymbol;
+let winningSymbol, spriteAnimateCounter;
 
 winCanvas.height = cellHeight;
 winCanvas.width = cellWidth;
-
-function animateWinSymbol() {
-  if (currentTime - lastRender > spriteAnimateTime) {
-    spriteAnimateCounter++;
-    lastRender = Date.now();
-  }
-  if (spriteAnimateCounter >= 20) spriteAnimateCounter = 0;
-  winContext.clearRect(0, 0, winCanvas.width, winCanvas.height);
-  winContext.drawImage(
-    currentSprite,
-    0,
-    spriteAnimateCounter * spriteDim,
-    spriteDim,
-    spriteDim,
-    0,
-    0,
-    winCanvas.width,
-    winCanvas.height
-  );
-  currentTime = Date.now();
-  spriteAnimateId = requestAnimationFrame(animateWinSymbol);
-}
-
-function makeShadows() {
-  context.globalAlpha = 0.5;
-  context.clearRect(0, cellHeight * 2, cellWidth, cellHeight);
-  context.fillRect(0, 0, cellWidth, canvas.height);
-  context.globalAlpha = 1;
-}
-
-function animateWin() {
-  currentTime = lastRender = Date.now();
-  winCanvas.style.display = "block";
-  makeShadows();
-  animateWinSymbol();
-}
 
 function getImageNumber() {
   winningSymbol = board[0][tableDim - 2];
@@ -283,69 +174,7 @@ function getImageNumber() {
   return symbolSrcArray[symbolSrcArray.length - 1].split(".")[0];
 }
 
-let symbolImg,
-  symbolSrcArray,
-  symbolNumber,
-  currentColumnImg,
-  currentTd,
-  currentScoreIndex,
-  audio;
-
-function checkWin() {
-  audio?.pause();
-  document.body.style.pointerEvents = "auto";
-  symbolNumber = getImageNumber();
-  currentSprite = sprites.find((sprite) =>
-    sprite.src.includes(`${symbolNumber}.png`)
-  );
-  if (symbolNumber == 10) {
-    audio = new Audio("./sounds/scatter.mp3");
-    soundEnabled && audio.play();
-    scatter();
-  } else if (symbolNumber == 0) {
-    audio = new Audio("./sounds/wild.mp3");
-    soundEnabled && audio.play();
-    wild();
-  } else {
-    tableHeads.forEach((th, i) => {
-      currentColumnImg = th.getElementsByTagName("img")[0];
-      if (currentColumnImg.src.includes(`${symbolNumber}.png`)) {
-        scores.map((score, i) => {
-          if (
-            score.id == symbolNumber &&
-            score.active &&
-            score.multiplier <= 9
-          ) {
-            score.multiplier += 2;
-            currentScoreIndex = i;
-          }
-          if (score.id == symbolNumber) {
-            score.active = true;
-            currentWinning = 0;
-            scores.forEach((score) => {
-              if (score.active) currentWinning += bet * score.multiplier;
-            });
-            balanceSpan.innerHTML = currentWinning;
-          }
-          return score;
-        });
-        if (scores[i].currentLevel > 0) {
-          currentTd =
-            th.parentNode.getElementsByClassName("td")[
-              scores[i].currentLevel - 1
-            ];
-          currentTd.style.color = "#680ab6";
-          currentTd.style.backgroundColor = "#fff";
-          scores[i].currentLevel -= 1;
-        }
-      }
-    });
-    audio = new Audio("./sounds/win.mp3");
-    soundEnabled && audio.play();
-  }
-  checkDisabled();
-  animateWin();
-}
+let symbolImg, symbolSrcArray, symbolNumber, audio, currentSprite;
 
 let bet = 10,
   currentBank = 5000,
@@ -353,13 +182,15 @@ let bet = 10,
   currentScore = 0,
   isDisabled = true,
   currentWinning = 0,
-  tds;
+  animationData = {
+    movementSpeed: speed,
+  };
 
 bankSpan.innerHTML = currentBank;
 betSpan.innerHTML = bet;
 balanceSpan.innerHTML = currentWinning;
 
-function checkDisabled() {
+function checkDisabledCollect() {
   scores.forEach((score) => {
     if (score.active) isDisabled = false;
   });
@@ -379,51 +210,13 @@ function collectMoney() {
   currentBank += winAmount;
   bankSpan.innerHTML = currentBank;
   winAmount = 0;
-  scatter();
+  scatter(scores, currentWinning, balanceSpan);
   context.clearRect(0, 0, canvas.width, canvas.height);
   winContext.clearRect(0, 0, winCanvas.width, winCanvas.height);
-  cancelAnimationFrame(spriteAnimateId);
+  cancelAnimationFrame(spriteAnimateId.id);
   isDisabled = true;
-  checkDisabled();
+  checkDisabledCollect();
   drawImages(true);
-}
-
-function scatter() {
-  document.querySelectorAll(".td").forEach((td) => {
-    td.style.color = "#fff";
-    td.style.backgroundColor = "#525050";
-  });
-  scores.forEach((score) => {
-    score.currentLevel = 5;
-    score.active = false;
-    if (score.id === 3 || score.id === 5) score.multiplier = 2;
-    else score.multiplier = 1;
-  });
-  currentWinning = 0;
-  balanceSpan.innerHTML = currentWinning;
-}
-
-function wild() {
-  scores.forEach((score, i) => {
-    if (score.active && score.multiplier <= 9) {
-      score.multiplier += 2;
-      currentScoreIndex = i;
-    }
-    score.active = true;
-    currentWinning = 0;
-    scores.forEach((score) => {
-      if (score.active) currentWinning += bet * score.multiplier;
-    });
-    balanceSpan.innerHTML = currentWinning;
-  });
-  tables.forEach((table, i) => {
-    if (scores[i].currentLevel > 0) {
-      currentTd = table.querySelectorAll(".td")[scores[i].currentLevel - 1];
-      currentTd.style.color = "#680ab6";
-      currentTd.style.backgroundColor = "#fff";
-      scores[i].currentLevel -= 1;
-    }
-  });
 }
 
 function spin() {
@@ -446,7 +239,7 @@ const spinBtn = document.getElementsByClassName("spin-btn")[0];
 spinBtn.addEventListener("click", (e) => {
   e.target.blur();
   animationData.movementSpeed = speed;
-  cancelAnimationFrame(spriteAnimateId);
+  cancelAnimationFrame(spriteAnimateId.id);
   spaceBlocked = true;
   spin();
 });
@@ -458,47 +251,6 @@ let aspectRatioScreen = {
 
 const ASPECT_RATIO = 16 / 9;
 
-function resize() {
-  if (innerWidth > innerHeight) {
-    if (onloadScale > ASPECT_RATIO) {
-      gameHeight = innerHeight;
-      gameWidth =
-        (gameHeight * aspectRatioScreen.widthScale) /
-        aspectRatioScreen.heightScale;
-    } else {
-      gameWidth = innerWidth;
-      gameHeight =
-        (gameWidth * aspectRatioScreen.heightScale) /
-        aspectRatioScreen.widthScale;
-    }
-  } else {
-    if (onloadScale > 1 / ASPECT_RATIO) {
-      gameHeight = outerHeight;
-      gameWidth =
-        (gameHeight * aspectRatioScreen.heightScale) /
-        aspectRatioScreen.widthScale;
-    } else {
-      gameWidth = outerWidth;
-      gameHeight =
-        (gameWidth * aspectRatioScreen.widthScale) /
-        aspectRatioScreen.heightScale;
-    }
-  }
-
-  resizeElements(gameWidth, gameHeight);
-  proportionalScaleCanvasScore();
-}
-
-function resizeElements(width, height) {
-  mainContainer.style.width = width + "px";
-  mainContainer.style.height = height + "px";
-}
-
-function proportionalScaleCanvasScore() {
-  canvas.style.height = `calc(${mainContainer.style.height} / 5)`;
-  winCanvas.style.height = `calc(${canvas.style.height} / 1.5)`;
-}
-
 let onloadScale,
   soundEnabled = false;
 
@@ -507,7 +259,7 @@ function playGame() {
     if (imagesLoaded) {
       soundEnabled && backgroundAudio.play();
       imagesLoaded = false;
-      checkDisabled();
+      checkDisabledCollect();
       drawImages(false);
       onloadScale = innerWidth / innerHeight;
       resize();
@@ -536,7 +288,7 @@ addEventListener("load", () => {
 addEventListener("keydown", (e) => {
   if (e.code === "Space" && !spaceBlocked) {
     animationData.movementSpeed = speed;
-    cancelAnimationFrame(spriteAnimateId);
+    cancelAnimationFrame(spriteAnimateId.id);
     spaceBlocked = true;
     spin();
   }

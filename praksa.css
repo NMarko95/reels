@@ -191,7 +191,7 @@ body{
     aspect-ratio: 1 / 1;
     position: absolute;
     top: 40%;
-    left: 46%;
+    left: 45%;
     order: 3;
 }
 
@@ -201,13 +201,13 @@ body{
     display: none;
     position: absolute;
     top: 42%;
-    left: 47%;
+    left: 46%;
     order: 3;
 }
 
 .wild-info, .scatter-info{
     position: absolute;
-    left: 41%;
+    left: 40%;
     width: 20%;
     height: 25%;
     display: flex;
@@ -290,7 +290,12 @@ body{
     }
 
     .wild-info, .scatter-info{
-        left: 40%;
+        left: 37%;
+        width: 30%;
+    }
+
+    .wild-info > p, .scatter-info > p{
+        font-size: 8px;
     }
     
 }
